@@ -19,7 +19,7 @@ form = '''<!DOCTYPE html>
     <button type="submit">Post it!</button>
   </form>
   <pre>
-{}
+    {}
   </pre>
 '''
 
@@ -41,6 +41,9 @@ class MessageHandler(BaseHTTPRequestHandler):
         memory.append(message)
 
         # 1. Send a 303 redirect back to the root page.
+        self.send_response(303)
+        self.send_header('Location', '/')
+        self.end_headers()
 
     def do_GET(self):
         # First, send a 200 OK response.
@@ -51,8 +54,16 @@ class MessageHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
         # 2. Put the response together out of the form and the stored messages.
+        response_data = ''
+        for entry in memory:
+            response_data += form.format(entry)
+
+        if not response_data:
+            response_data = form
 
         # 3. Send the response.
+        self.wfile.write(response_data.encode())
+
 
 if __name__ == '__main__':
     server_address = ('', 8000)

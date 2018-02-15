@@ -22,18 +22,46 @@ from urllib.parse import parse_qs
 
 
 class MessageHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        # Save HTML in string
+        form_html = """
+        <!DOCTYPE html>
+            <title>Message Board</title>
+            <form method="POST" action="http://localhost:8000/">
+                <textarea name="message"></textarea>
+                <br>
+                <button type="submit">Post it!</button>
+            </form>
+            """
+        # send success response
+        self.send_response(200)
+
+        # send headers
+        self.send_header('Content-type', 'text/html; charset=utf-8')
+        self.end_headers()
+
+        # send html
+        self.wfile.write(form_html.encode())
+
     def do_POST(self):
         # 1. How long was the message? (Use the Content-Length header.)
+        message_length = int(self.headers.get('Content-Length', 0))
 
         # 2. Read the correct amount of data from the request.
+        request_data = self.rfile.read(message_length).decode()
 
         # 3. Extract the "message" field from the request data.
+        request_message = parse_qs(request_data).get('message')
 
         # Send the "message" field back as the response.
         self.send_response(200)
         self.send_header('Content-type', 'text/plain; charset=utf-8')
         self.end_headers()
-        self.wfile.write(message.encode())
+        if request_message is not None:
+            self.wfile.write(request_message[0].encode())
+        else:
+            self.wfile.write('No data was submitted!'.encode())
+
 
 if __name__ == '__main__':
     server_address = ('', 8000)

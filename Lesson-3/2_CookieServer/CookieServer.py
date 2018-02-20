@@ -44,6 +44,9 @@ class NameHandler(BaseHTTPRequestHandler):
         # 1. Set the fields of the cookie.
         #    Give the cookie a value from the 'yourname' variable,
         #    a domain (localhost), and a max-age.
+        c['yourname'] = yourname
+        c['domain'] = 'localhost'
+        c['max-age'] = 3600
 
         # Send a 303 back to the root page, with a cookie!
         self.send_response(303)  # redirect via GET

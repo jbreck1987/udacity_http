@@ -36,7 +36,10 @@ class NameHandler(BaseHTTPRequestHandler):
 
         # Read and parse the post data
         data = self.rfile.read(length).decode()
-        yourname = parse_qs(data)["yourname"][0]
+        if 'yourname' in parse_qs(data):
+            yourname = parse_qs(data)["yourname"][0]
+        else:
+            yourname = 'looks like you didnt submit anything!'
 
         # Create cookie.
         c = cookies.SimpleCookie()
@@ -45,8 +48,8 @@ class NameHandler(BaseHTTPRequestHandler):
         #    Give the cookie a value from the 'yourname' variable,
         #    a domain (localhost), and a max-age.
         c['yourname'] = yourname
-        c['domain'] = 'localhost'
-        c['max-age'] = 3600
+        c['yourname']['path'] = '/'
+        c['yourname']['max-age'] = 3600
 
         # Send a 303 back to the root page, with a cookie!
         self.send_response(303)  # redirect via GET
@@ -64,6 +67,8 @@ class NameHandler(BaseHTTPRequestHandler):
                 # 2. Extract and decode the cookie.
                 #    Get the cookie from the headers and extract its value
                 #    into a variable called 'name'.
+                in_cookie = cookies.SimpleCookie(self.headers["cookie"])
+                name = in_cookie['yourname'].value
 
                 # Craft a message, escaping any HTML special chars in name.
                 message = "Hey there, " + html_escape(name)
